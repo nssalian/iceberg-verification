@@ -46,3 +46,13 @@ jobs:
       run: python3 -m pip install -r dev/requirements.txt
     - name: Validate cases.json
       run: python3 dev/validate-fixtures.py
+    - name: Validator rejects a malformed fixture (self-test)
+      run: |
+        tmp="$(mktemp -d)"
+        mkdir -p "$tmp/table-spec/types/x"
+        printf '%s' '{"cases":[{"id":"bad","valid":true,"input":"int","clause":"c","spec_ref":"s"}]}' > "$tmp/table-spec/types/x/cases.json"
+        if python3 dev/validate-fixtures.py "$tmp"; then
+          echo "self-test FAILED: validator accepted a malformed fixture (valid:true with no decoded)"
+          exit 1
+        fi
+        echo "self-test ok: validator rejected the malformed fixture"

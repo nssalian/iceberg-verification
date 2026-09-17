@@ -16,4 +16,4 @@
 # under the License.
 
 # Dependencies for the dev/ tooling (fixture validation).
-jsonschema>=4.18
+jsonschema>=4.18,<5

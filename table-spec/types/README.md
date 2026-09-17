@@ -68,13 +68,14 @@ One `cases.json` per directory, a JSON object with a `cases` array:
 
 | field | meaning |
 | --- | --- |
-| `id` | unique case id |
+| `id` | case id, unique within the surface |
 | `valid` | `true` if the parser must accept `input`, `false` if it must reject it |
 | `input` | the type string (`"decimal(9,2)"`), or a JSON object for a nested type |
 | `decoded` | the decoded shape; present only when `valid` is `true` |
 | `canonical` | the exact re-serialized string; present only where the spec pins one spelling |
 | `clause` | the spec rule this case pins |
 | `spec_ref` | anchor into `format/spec.md` |
+| `normative_level` | optional; `must` (default) or `should` for an advisory case a conformant reader may reject |
 
 `decoded` is language-neutral:
 
@@ -88,6 +89,14 @@ One `cases.json` per directory, a JSON object with a `cases` array:
 
 A nested type's child `type` values are the same shape, recursively.
 
+Case ids are unique within a surface (the top-level directory under `table-spec/`),
+so a future surface may reuse a name like `int` or `string`.
+
+Cases are normative MUST by default. A case marked `normative_level: "should"` is
+advisory: the spec only recommends the behavior, so a reader that diverges is still
+conformant. Example: `decimal( 9 , 2 )`, since readers *should* accept optional
+whitespace around parameters and separators (Appendix C).
+
 ## Provenance
 
 `input` and `decoded` are derived from `format/spec.md` (the Primitive Types
@@ -100,10 +109,6 @@ Inputs the spec neither permits nor forbids, so no answer can be spec-derived:
 
 - `scale > precision`, e.g. `decimal(5, 10)`.
 - lower bounds, e.g. `decimal(0, 0)` / `fixed[0]`.
-- internal whitespace around every parameter, e.g. `decimal( 9 , 2 )`. The one
-  spaced case we do ship, `decimal(9, 2)`, is a *recommended* (SHOULD) accept,
-  not a hard requirement: the spec says readers *should*, not *must*, accept
-  optional whitespace, so an implementation that rejects it is still conformant.
 - keyword case, e.g. `DECIMAL(9,2)`.
 - geospatial CRS *quoting*, e.g. `geometry('OGC:CRS84')`. The spec's canonical
   form is unquoted (`geometry(OGC:CRS84)`), which the shipped cases use; whether
