@@ -32,7 +32,7 @@ acquire_rat_jar () {
       wget --quiet ${URL} -O "$JAR_DL" && mv "$JAR_DL" "$JAR"
     else
       printf "You do not have curl or wget installed, please install rat manually.\n"
-      exit -1
+      exit 1
     fi
   fi
 
@@ -41,7 +41,7 @@ acquire_rat_jar () {
     # We failed to download
     rm "$JAR"
     printf "Our attempt to download rat locally to ${JAR} failed. Please install rat manually.\n"
-    exit -1
+    exit 1
   fi
 }
 
@@ -56,8 +56,8 @@ else
 fi
 
 export RAT_VERSION=0.17
-export rat_jar="$FWDIR"/lib/apache-rat-${RAT_VERSION}.jar
-mkdir -p "$FWDIR"/lib
+export rat_jar="$FWDIR/lib/apache-rat-${RAT_VERSION}.jar"
+mkdir -p "$FWDIR/lib"
 
 [[ -f "$rat_jar" ]] || acquire_rat_jar || {
     echo "Download failed. Obtain the rat jar manually and place it at $rat_jar"
@@ -68,7 +68,7 @@ mkdir -p "$FWDIR"/lib
 # flags the .git pointer *file* that git worktrees use, since its built-in SCM
 # exclusion only covers .git directories.
 $java_cmd -jar "$rat_jar" \
-  --input-exclude-file "$FWDIR"/dev/.rat-excludes \
+  --input-exclude-file "$FWDIR/dev/.rat-excludes" \
   --input-exclude-std GIT IDEA MAC \
   --input-include-std HIDDEN_DIR \
   --output-style missing-headers \

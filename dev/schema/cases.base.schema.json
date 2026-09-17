@@ -5,6 +5,7 @@
   "description": "Structure shared by every table-spec surface's cases.json.",
   "type": "object",
   "required": ["cases"],
+  "additionalProperties": false,
   "properties": {
     "cases": {
       "type": "array",
@@ -15,6 +16,7 @@
     "case": {
       "type": "object",
       "required": ["id", "valid", "input"],
+      "additionalProperties": false,
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "valid": { "type": "boolean" },
@@ -22,7 +24,8 @@
         "decoded": true,
         "canonical": { "type": "string" },
         "clause": { "type": "string" },
-        "spec_ref": { "type": "string" }
+        "spec_ref": { "type": "string" },
+        "normative_level": { "enum": ["must", "should"], "description": "must (default) or should. A should case is advisory (the spec only recommends the behavior); a runner must report a failed should distinctly from a pass, so the advisory tier stays visible rather than reading as inert." }
       },
       "allOf": [
         {

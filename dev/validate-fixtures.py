@@ -78,13 +78,18 @@ def main():
 
         cases = doc.get("cases") if isinstance(doc, dict) else None
         if isinstance(cases, list):
+            # ids are unique per surface (the top-level dir under table-spec), so a
+            # future surface may reuse names like int/string/timestamp.
+            parts = _rel(os.path.relpath(path, root)).split("/")
+            surface = parts[parts.index("table-spec") + 1] if "table-spec" in parts and parts.index("table-spec") + 1 < len(parts) else parts[0]
             for i, case in enumerate(cases):
                 if isinstance(case, dict) and isinstance(case.get("id"), str) and case["id"]:
                     cid = case["id"]
-                    if cid in seen_ids:
-                        errors.append(f"{path}[{i}]: duplicate id '{cid}' (first seen at {seen_ids[cid]})")
+                    key = (surface, cid)
+                    if key in seen_ids:
+                        errors.append(f"{path}[{i}]: duplicate id '{cid}' in surface '{surface}' (first seen at {seen_ids[key]})")
                     else:
-                        seen_ids[cid] = f"{path}[{i}]"
+                        seen_ids[key] = f"{path}[{i}]"
             total += len(cases)
             print(f"  {path}: {len(cases)} cases")
 
