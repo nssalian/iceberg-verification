@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+#
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -14,17 +16,26 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+#
+# Fail if a committed runner dependency file carries a local source override.
+set -uo pipefail
+root="$(cd "$(dirname "$0")/.." && pwd)"
+fail=0
 
-.gitignore
-LICENSE
-NOTICE
-lib
+check() { # <file> <extended-regex> <message>
+  hits="$(grep -nE "$2" "$root/$1" 2>/dev/null)"
+  if [ -n "$hits" ]; then
+    echo "FAIL: $1 - $3"
+    printf '%s\n' "$hits" | sed 's/^/    /'
+    fail=1
+  fi
+}
 
-# Fixture data and JSON Schemas have no comment syntax, so they cannot carry an
-# Apache header; they are covered by the repository LICENSE and NOTICE at the root.
-**/*.json
-**/*.jsonl
+check runners/java/build.gradle    'mavenLocal|includeBuild'             "committed local build reference - leaked"
+check runners/java/settings.gradle  'includeBuild'                        "committed composite-build reference - leaked"
 
-# Vendored Gradle wrapper (upstream Gradle files, no ASF header).
-**/gradle/wrapper/gradle-wrapper.properties
-**/gradle/wrapper/gradle-wrapper.jar
+if [ "$fail" -eq 0 ]; then
+  echo "runner deps are release-clean"
+else
+  exit 1
+fi
